@@ -1,0 +1,173 @@
+
+=============================================================================
+Beacon Packet: 
+==============
+
+Preamble: 1 byte = Alternating bits (0xAA)
+
+Access Header: 4 bytes = Fixed value for advertising packets (0x8E89BED6)
+
+Header: 1 byte = 0x20 (ADV_NONCONN_IND frame, TXADD_flag = 0, RXADD_flag = 0)
+
+Length: 1 byte = 0x94 (Length field = 0x25 (37), RFU[1:0] = 0x0)
+
+Public Address: 6 bytes = 9C25BE-txxxxx, 
+       		  t = 0x0 for bird, 0x1 = Bat unit, undefined anything else
+		  xxxxx = hexadecimal serial number. 
+
+Field (Flag) length: 1 byte = 0x2 (size of current field in bytes)
+
+Field (Flag) Type: 1 byte = 0x1 (Flag field). 
+
+Field (Flag) data: 1 byte = 0x6 (Flags set: General Discoverable mode,
+      	     	     	    	       	    BR/EDR not supported)
+
+Field (Manufacturing Data) Length: 1 byte = 27 (0x1B)
+
+Field (Manufacturing Data) Type: 1 byte = 0xFF
+
+Field (Manufacturing Data) Data: 26 bytes  = Payload (either "Telemetry" or 
+                                             "Time Recording")
+
+CRC: 3 bytes
+=============================================================================
+
+
+=============================================================================
+Telemetry Payload
+=================
+
+There are two beacon types, sent out ~five seconds apart. The first beacon 
+is the telemetry beacon and consists of the following fields: 
+
+Manufacturing Company:  2 bytes = {0x30, 0x07} // Company ID = 0x0730
+                                  Code for Wildlife Acoustics, Inc.
+
+Beacon ID: 1 byte =   <7> - 0 for Telemetry Beacon
+       	     	      <6> - 0 for Bird, 1 for Bat
+		      <5> - 1 if second microphone present, 0 otherwise
+                    <4:0> - Beacon version number. 
+
+Box Type: 4-bits =   0x0 for bird, 0x1 = Bat unit, anything else is reserved 
+
+Serial number : 20-bits = 5 digit hexadecimal serial number (same as above)
+
+
+First Half the Condensed Prefix name: 36-bits (first six characters)
+     	 The prefix consists of twelve 6-bit characters. The conversion is
+	 straight forward: 
+	 	Character	  	  Value
+		  NULL 		    	    0
+		"A" - "Z"		 1 to 26
+		"0" - "9"		27 to 36
+		   "-"		   	   37
+ 	 Should the Prefix be less than twelve characters, the NULL character  
+	 will be repeated for the remainder of the condensed prefix array. 
+
+Reserved field: 12-bits set to 0x000.
+
+SD Card capacity: 2 bytes = SD card capacity to 0.0625 GB resolution, low byte 
+   		    	    first in the air.
+
+SD Card usage: 2 bytes =  SD card capacity used to 0.0625 GB resolution, low 
+   		    	  byte first in the air.
+
+Unit temperature: 2 bytes = Signed temperature in 1/4 degress Celsius units. 
+     		    	    low byte in the air first. 
+
+Battery voltage: 2 bytes = Main Battery voltage in millivolts. Low byte first. 
+
+Firmware Index: 1 byte = From the Status characteristic. 
+
+Error code: 2 bytes = Low byte first. Error codes defined below:
+      	    Status                                                 Error Code
+            ==================================================     ==========
+            No error                                                 0x0000
+            No date/time yet received from the App.                  0x0001
+            STM32 RTC battery too low or missing.                    0x0002
+            SD Card missing                                          0x0003
+            SD Card full                                             0x0004
+            Last SD Card Failed.                                     0x0005
+            Received STM32 firmware is corrupt.                      0x0006
+            Received BT module firmware is corrupt.                  0x0007
+            Update of STM32 firmware failed.                         0x0008
+            Update of BT module firmware failed.                     0x0009
+            Something in the configuration doesn't make sense.       0x000A
+            Something in the schedule doesn't make sense.            0x000B
+            There's no microphone.                                   0x000C
+
+
+Number of recordings: 3 bytes = Unsigned integer, low byte on the in the air 
+                                first. 
+=============================================================================
+
+
+=============================================================================
+Time Recording Payload
+=======================
+
+The second beacon type is the time recording beacon and consists of the following
+fields: 
+
+Manufacturing Company:  2 bytes = {0x30, 0x07} // Company ID = 0x0730
+                                  Code for Wildlife Acoustics, Inc.
+
+Beacon ID: 1 byte =   <7> - 1 for Time recording Beacon
+       	     	      <6> - 0 for Bird, 1 for Bat
+		      <5> - 1 if second microphone present, 0 otherwise 
+                    <4:0> - Beacon version number. 
+
+Box Type: 4-bits =   0x0 for bird, 0x1 = Bat unit, anything else is reserved 
+
+Serial number : 20-bits = 5 digit hexadecimal serial number (same as above)
+
+Second half of the Condensed Prefix name: 36-bits. See above.
+
+Reserved field: 12-bits set to 0x000.
+
+Time Zone: 1 byte - Signed UTC time zone offset in 1/4 hour increments. 
+
+Current Time: 4 bytes - Standard current time in seconds, low byte first. 
+                        Seconds since 01 Jan 2000 00:00:00 UTC 
+
+Time of next recording: 4 bytes - Time at which next recording occurs. Same 
+     	     		  	  format as current time. 
+
+Length of next recording: 3 bytes - Length in seconds of next recording,
+                                    low byte first. 
+
+Schedule: 1 byte - ID number of the current schedule, if it's a WA-defined 
+	    	   schedule; 0 otherwise. See below:
+        Mode       Daily Recording                                    Index
+        ======     ===========================================       ======
+        Custom     Custom Schedule                                    0x00
+        Bat        24 hour recording                                  0x01
+        Bat        Sunrise to sunset recording.                       0x02
+        Bat        30min before sunset to 30 min after sunrise        0x03
+        Bird       24 hour recording                                  0x04
+        Bird       20min each hour                                    0x05
+        Bird       5min each hour                                     0x06
+        Bird       Sunrise to suneset                                 0x07
+        Bird       2hr before sunrise to 2hrs after sunset            0x08
+
+
+Sample Rate Index: 1 byte - Index that indicates the sample rate for the next 
+       	    	     	    recording. See table below.
+	   	    	  	Sample Rate   	         Index
+                                ===========             ======
+	  			    8000  	         0x01
+  	    			   12000     		 0x02
+  	    			   16000     		 0x03
+  	    			   22050     		 0x04
+  	    			   24000     		 0x05
+  	    			   32000     		 0x06
+  	    			   44100     		 0x07
+  	    			   48000     		 0x08
+  	    			   64000      		 0x09
+ 	    			   88200     		 0x0A
+ 	    			   96000     		 0x0B
+ 	   			  256000     		 0x0C
+ 	   			  384000     		 0x0D
+ 	   			  500000      		 0x0E
+  
+=============================================================================
