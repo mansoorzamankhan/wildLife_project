@@ -7,7 +7,7 @@
 #include <BLEUtils.h>
 #include <BLEScan.h>
 #include <BLEAdvertisedDevice.h>
-#define MAC "0c:b8:15:c4:0a:be"
+#define MAC " Address: 3c:00:ac:1c:71:43"
 String address = "";
 String rawData = "";
 String data = "";
@@ -21,10 +21,29 @@ int partIndex = 0;   // index of the current part being parsed
 
 class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
   void onResult(BLEAdvertisedDevice advertisedDevice) {
-   
-   Serial.print("available devices: ");
-    Serial.println(address);  //print devices that are scaned
 
+
+    //print devices that are scaned
+    //rawData = advertisedDevice.toString().c_str();
+    rawData = advertisedDevice.toString().c_str();  // extract the raw data from becon
+    // loop through each character in the input string
+    for (int i = 0; i < rawData.length(); i++) {
+      if (rawData.charAt(i) == ',') {                         // if a comma is found
+        parts[partIndex] = rawData.substring(commaIndex, i);  // parse the current part
+        commaIndex = i + 1;                                   // update the comma index
+        partIndex++;                                          // move on to the next part
+      }
+    }
+    // parse the last part (after the last comma)
+    parts[partIndex] = rawData.substring(commaIndex);
+    // print the parsed parts
+
+    address = parts[1];
+    Serial.println(address);
+    partIndex = 0;
+    commaIndex = 0;
+
+    //Serial.println(address);
     if (address == MAC) {
       device_found = true;
       Serial.println("SM MINI found: ");
@@ -41,12 +60,10 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
       parts[partIndex] = rawData.substring(commaIndex);
       // print the parsed parts
 
-      data=parts[2];
+      data = parts[2];
       Serial.println(data);
       partIndex = 0;
       commaIndex = 0;
-
-      
     }
   }
 };
@@ -64,14 +81,13 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if (device_found == false) {  // if beacon device is found then stop scanning 
-    for (byte i = 0; i < 1; i++) { // scan again if the device is found to receive the second payload 
-      BLEScanResults foundDevices = pBLEScan->start(scanTime, false);// get data from found device 
-      address = BLEDevice::getAddress().toString().c_str();  // find adresses of scaned devices
+  if (device_found == false) {      // if beacon device is found then stop scanning
+    for (byte i = 0; i < 1; i++) {  // scan again if the device is found to receive the second payload
+      Serial.println("available devices: ");
+      BLEScanResults foundDevices = pBLEScan->start(scanTime, false);  // get data from found device
       Serial.println("Scan done!");
       pBLEScan->clearResults();  // delete results fromBLEScan buffer to release memory
       delay(2000);
-
     }
-  } 
+  }
 }
