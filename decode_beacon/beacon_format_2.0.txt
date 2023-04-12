@@ -40,10 +40,9 @@ Telemetry Payload
 There are two beacon types, sent out ~five seconds apart. The first beacon 
 is the telemetry beacon and consists of the following fields: 
 
-Manufacturing Company:  2 bytes = {0x30, 0x07} // Company ID = 0x0730
+Maunfacturer :  2 bytes = {0x30, 0x07} // Company ID = 0x0730
                                   Code for Wildlife Acoustics, Inc.
-
-Beacon ID: 1 byte =   <7> - 0 for Telemetry Beacon
+ Beacon ID: 1 byte =   <7> - 0 for Telemetry Beacon
        	     	      <6> - 0 for Bird, 1 for Bat
 		      <5> - 1 if second microphone present, 0 otherwise
                     <4:0> - Beacon version number. 
