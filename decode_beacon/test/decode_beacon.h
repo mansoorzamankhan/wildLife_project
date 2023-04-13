@@ -1,51 +1,7 @@
 #include <TimeLib.h>
+#ifndef __decode_beacon_h__
+  #define __decode_beacon_h__
 
-//definations
-String Manufacturing_Company = "Wildlife Acoustics, Inc.";
-//beacon id
-String TIME;
-int beaconID_int;
-unsigned int intValue;
-byte output_bits[8];
-String payload_type;
-String bird;
-String mic2;
-String box_type;
-byte beacon_version[4];
-//box and serial
-String SD_capacity;
-String SD_used;
-String Temprature;
-String battery_level;
-String Firmware_index;
-String error_code;
-String recording_no;
-String TimeZone;
-String current_time;
-String Time_of_next_recording;
-String length_of_next_recording;
-String current_schedule;
-String Sampling_rate;
-String data = " manufacturer data: 30074110692786476294800003029000640069141600001f0000";
-//String data = " manufacturer data: 3007c110692705095b70000004447cc62bd871c62b183102010b";
-
-
-String beacon_byte[26];        // beacon bytes
-byte binary_beacon_byte_2[8];  // binary values of beacon byte 2
-
-int int_beacon_byte_234[3];
-
-byte binary_beacon_byte_234[24];
-void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(115200);
-  Decode_telemetry(data);
-  //Decode_recording(data);
-}
-
-void loop() {
-  // put your main code here, to run repeatedly:
-}
 void Decode_recording(String input) {
   input.remove(0, 20);  // remove unncecessary data from received string
   for (int i = 0; i < 26; i++) {
@@ -145,13 +101,6 @@ void Decode_recording(String input) {
   Serial.print("Sampling_rate : ");
   Serial.println(Sampling_rate);
 }
-
-
-
-
-
-
-
 void Decode_telemetry(String input) {
   input.remove(0, 20);  // remove unncecessary data from received string
   for (int i = 0; i < 26; i++) {
@@ -279,25 +228,4 @@ void Decode_telemetry(String input) {
   Serial.print("recording_no : ");
   Serial.println(recording_no);
 }
-
-void hex_to_int(String input) {
-  intValue = strtol(input.c_str(), NULL, 16);
-}
-void int_to_bits(void) {
-  for (int i = 0; i < 8; i++) {
-    output_bits[i] = (intValue >> i) & 0x01;
-  }
-}
-void time_conversion(unsigned int _time) {
-  setTime(946684800);
-  adjustTime(_time);
-  TIME = String(day()) + "/" + String(month()) + "/" + String(year()) + "  " + String(hour()) + ":" + String(minute()) + ":" + String(second());
-}
-
-
-void display_bits(void) {
-  for (int i = 7; i > -1; i--) {
-    Serial.print(output_bits[i]);
-  }
-  Serial.println("");
-}
+#endif
