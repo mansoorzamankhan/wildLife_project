@@ -282,40 +282,63 @@ void Decode_telemetry(String input) {
 
 
   //******************* prefix ********************
-  int hexArray[6] = {};
-  for ( int i=0;i<6;i++)
-  {
-    hex_to_int(beacon_byte[i+6]);
-    hexArray[i]=intValue;
+  // const char lut[] = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-";
+  // byte binaryArray[5] = {};  // example 36-bit binary array
+  // int intArray[] = {};
+  // for (byte i = 0; i < 5; i++) {
+  //   hex_to_int(beacon_byte[i + 6]);
+  //   binaryArray[i] = byte(intValue);
+  //   Serial.println(binaryArray[i]);
+  // }
 
-  }
-    
-  
-  byte binArray[36];
-  char charLookup[] = { ' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-' };
+  // char sixBitArray[6];  // array to store 6-bit characters
+  // int index = 0;        // index to keep track of the position in the 6-bit array
 
-  // Convert the first 36 bits of the hex array into binary
-  for (int i = 0; i < 4; i++) {
-    byte b1 = (hexArray[i] >> 4) & 0x0F;
-    byte b2 = hexArray[i] & 0x0F;
-    binArray[i * 9] = (b1 >> 2) & 0x01;
-    binArray[i * 9 + 1] = (b1 >> 1) & 0x01;
-    binArray[i * 9 + 2] = b1 & 0x01;
-    binArray[i * 9 + 3] = (b2 >> 2) & 0x01;
-    binArray[i * 9 + 4] = (b2 >> 1) & 0x01;
-    binArray[i * 9 + 5] = b2 & 0x01;
-    binArray[i * 9 + 6] = 0;  // padding bit
-    binArray[i * 9 + 7] = 0;  // padding bit
-    binArray[i * 9 + 8] = 0;  // padding bit
-  }
+  // for (int i = 0; i < 5; i++) {                        // loop through each byte in the binary array
+  //   for (int j = 0; j < 6; j++) {                      // loop through each pair of 6 bits
+  //     byte bits = (binaryArray[i] >> (j * 6)) & 0x3F;  // extract 6 bits from the current position
+  //     sixBitArray[index] = lut[bits];                  // look up the corresponding 6-bit character from the lookup table and store it in the 6-bit array
+  //     index++;                                         // move to the next position in the 6-bit array
+  //   }
+  // }
 
-  // Convert each 6-bit binary value into its decimal representation and look up the corresponding character
+  // // print the resulting 6-bit array
+  // for (int i = 0; i < 6; i++) {
+  //   Serial.print(sixBitArray[i]);
+  // }
+
+
+
+
+    int intArray[] = {};
+    byte _bits[40];
+    for (byte i = 0; i < 5; i++) {
+      hex_to_int(beacon_byte[i + 6]);
+      intArray[i] = intValue;
+
+
+      for (byte j = 0; j < 8; j++) {
+        int_to_bits();
+        _bits[(i * 8) + j] = output_bits[j];
+        Serial.print(_bits[(i * 8) + j]);
+      }
+    }
+  Serial.println("");
+  const char lut[] = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-";
+
+  String characterString = "";
+
   for (int i = 0; i < 36; i += 6) {
-    byte binValue = (binArray[i] << 5) | (binArray[i + 1] << 4) | (binArray[i + 2] << 3) | (binArray[i + 3] << 2) | (binArray[i + 4] << 1) | binArray[i + 5];
-    // int decimalValue = binToDec(binValue);
-    // String prefix[i] = charLookup[decimalValue];
-    Serial.println(binArray[i]);
+    byte sixBits = 0;
+    for (int j = 0; j < 6; j++) {
+      sixBits <<= 1;
+      sixBits |= _bits[i + j];
+      Serial.println(sixBits);
+    }
+    characterString += lut[sixBits];
   }
+
+  Serial.println(characterString);
 }
 
 void hex_to_int(String input) {
