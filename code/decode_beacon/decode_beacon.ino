@@ -26,6 +26,7 @@ String Time_of_next_recording;
 String length_of_next_recording;
 String current_schedule;
 String Sampling_rate;
+String prefix;
 String data = " manufacturer data: 30074110692786476294800003029000640069141600001f0000";
 //String data = " manufacturer data: 3007c110692705095b70000004447cc62bd871c62b183102010b";
 
@@ -278,6 +279,43 @@ void Decode_telemetry(String input) {
   recording_no = String(intValue);
   Serial.print("recording_no : ");
   Serial.println(recording_no);
+
+
+  //******************* prefix ********************
+  int hexArray[6] = {};
+  for ( int i=0;i<6;i++)
+  {
+    hex_to_int(beacon_byte[i+6]);
+    hexArray[i]=intValue;
+
+  }
+    
+  
+  byte binArray[36];
+  char charLookup[] = { ' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-' };
+
+  // Convert the first 36 bits of the hex array into binary
+  for (int i = 0; i < 4; i++) {
+    byte b1 = (hexArray[i] >> 4) & 0x0F;
+    byte b2 = hexArray[i] & 0x0F;
+    binArray[i * 9] = (b1 >> 2) & 0x01;
+    binArray[i * 9 + 1] = (b1 >> 1) & 0x01;
+    binArray[i * 9 + 2] = b1 & 0x01;
+    binArray[i * 9 + 3] = (b2 >> 2) & 0x01;
+    binArray[i * 9 + 4] = (b2 >> 1) & 0x01;
+    binArray[i * 9 + 5] = b2 & 0x01;
+    binArray[i * 9 + 6] = 0;  // padding bit
+    binArray[i * 9 + 7] = 0;  // padding bit
+    binArray[i * 9 + 8] = 0;  // padding bit
+  }
+
+  // Convert each 6-bit binary value into its decimal representation and look up the corresponding character
+  for (int i = 0; i < 36; i += 6) {
+    byte binValue = (binArray[i] << 5) | (binArray[i + 1] << 4) | (binArray[i + 2] << 3) | (binArray[i + 3] << 2) | (binArray[i + 4] << 1) | binArray[i + 5];
+    // int decimalValue = binToDec(binValue);
+    // String prefix[i] = charLookup[decimalValue];
+    Serial.println(binArray[i]);
+  }
 }
 
 void hex_to_int(String input) {
