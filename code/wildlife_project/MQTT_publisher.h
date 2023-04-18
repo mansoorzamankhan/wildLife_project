@@ -1,3 +1,8 @@
+#ifndef __MQTT_PUBLISHER_H__
+#define __MQTT_PUBLISHER_H__
+
+
+
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
@@ -14,7 +19,7 @@ const char* mqtt_topic = "wildlife_data";
 const char* mqtt_username = "Wildlife_project";
 const char* mqtt_password = "Abbasial2023";
 
-const char* mqtt_server_CA PROGMEM=  R"EOF(
+const char* mqtt_server_CA PROGMEM = R"EOF(
 -----BEGIN CERTIFICATE-----
 MIIFazCCA1OgAwIBAgIRAIIQz7DSQONZRGPgu2OCiwAwDQYJKoZIhvcNAQELBQAw
 TzELMAkGA1UEBhMCVVMxKTAnBgNVBAoTIEludGVybmV0IFNlY3VyaXR5IFJlc2Vh
@@ -47,25 +52,34 @@ mRGunUHBcnWEvgJBQl9nJEiU0Zsnvgc/ubhPgXRR4Xq37Z0j4r7g1SgEEzwxA57d
 emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
 -----END CERTIFICATE-----
 )EOF";
-// MQTT client
 WiFiClientSecure espClient;
 PubSubClient client(espClient);
 
-void setup() {
-  Serial.begin(115200);
+void mqtt_setup(void);
+
+
+void mqtt_Setup(void) {
+
+  espClient.setCACert(mqtt_server_CA);
+  client.setServer(mqtt_server, mqtt_port);
+}
+
+
+void connectWifi(void) {
 
   // Connect to WiFi
   WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi.");
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
-    Serial.println("Connecting to WiFi...");
+    Serial.print(".");
   }
+  Serial.println("");
   Serial.println("Connected to WiFi");
+}
+void connect_MQTT(void) {
 
-  // Connect to MQTT broker
-  espClient.setCACert(mqtt_server_CA);
-  client.setServer(mqtt_server, mqtt_port);
-  client.setCallback(callback);
+  //connect to mqtt broker
   while (!client.connected()) {
     if (client.connect("ESP32Client", mqtt_username, mqtt_password)) {
       Serial.println("Connected to MQTT broker");
@@ -78,7 +92,8 @@ void setup() {
   }
 }
 
-void loop() {
+void send_MQTT_data(void) {
+  void connect_MQTT(void);
   // Generate some data to send
   float data = random(0, 100);
   // Convert data to string
@@ -90,29 +105,14 @@ void loop() {
   } else {
     Serial.println("Failed to send data to MQTT broker");
   }
-
   // Reconnect to MQTT broker if necessary
   if (!client.connected()) {
-    reconnect();
-  }
 
+    connect_MQTT();
+  }
   // Check for new messages from MQTT broker
   client.loop();
 }
 
-void callback(char* topic, byte* payload, unsigned int length) {
-  // Handle incoming messages from MQTT broker
-}
 
-void reconnect() {
-  while (!client.connected()) {
-    if (client.connect("ESP32Client", mqtt_username, mqtt_password)) {
-      Serial.println("Reconnected to MQTT broker");
-    } else {
-      Serial.print("Failed to reconnect to MQTT broker, rc=");
-      Serial.print(client.state());
-      Serial.println(" retrying in 5 seconds");
-      delay(5000);
-    }
-  }
-}
+#endif
