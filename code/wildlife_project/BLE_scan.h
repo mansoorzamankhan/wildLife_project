@@ -1,5 +1,5 @@
-
-
+#ifndef __BLE_SCAN_H__
+  #define __BLE_SCAN_H__
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEScan.h>
@@ -42,7 +42,7 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
     commaIndex = 0;
 
     //Serial.println(address);
-    if (address == MAC) { // compare the address 
+    if (address == MAC) {  // compare the address
       device_found = true;
       Serial.println("SM MINI found: ");
       data = parts[2];
@@ -53,27 +53,4 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
   }
 };
 
-void setup() {
-  Serial.begin(115200);
-  Serial.println("Scanning...");
-  BLEDevice::init("");
-  pBLEScan = BLEDevice::getScan();  //create new scan
-  pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
-  pBLEScan->setActiveScan(true);  //active scan uses more power, but get results faster
-  pBLEScan->setInterval(100);
-  pBLEScan->setWindow(99);  // less or equal setInterval value
-}
-
-void loop() {
-  // put your main code here, to run repeatedly:
-  if (device_found == false) {      // if beacon device is found then stop scanning
-    for (byte i = 0; i < 1; i++) {  // scan again if the device is found to receive the second payload
-      Serial.println("available devices: ");
-      BLEScanResults foundDevices = pBLEScan->start(scanTime, false);  // get data from found device
-      Serial.println("Scan done!");
-      pBLEScan->clearResults();  // delete results fromBLEScan buffer to release memory
-      delay(2000);
-    }
-  }
-}
-
+#endif
