@@ -26,10 +26,12 @@ String Time_of_next_recording;
 String length_of_next_recording;
 String current_schedule;
 String Sampling_rate;
-String prefix;
-String data = " manufacturer data: 30074110692786476294800003029000640069141600001f0000";
-//String data = " manufacturer data: 3007c110692705095b70000004447cc62bd871c62b183102010b";
-
+String prefix1;
+String prefix2;
+String recorder_name;
+String data_beacon1 = " manufacturer data: 30074110692786476294800003029000640069141600001f0000";
+String data_beacon2 = " manufacturer data: 3007c110692705095b70000004447cc62bd871c62b183102010b";
+const char lut[] = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-";
 
 String beacon_byte[26];        // beacon bytes
 byte binary_beacon_byte_2[8];  // binary values of beacon byte 2
@@ -40,8 +42,13 @@ byte binary_beacon_byte_234[24];
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
-  Decode_telemetry(data);
-  //Decode_recording(data);
+  Decode_telemetry(data_beacon1);
+  Decode_recording(data_beacon2);
+  recorder_name= prefix1+prefix2;
+  Serial.print("recorder name : ");
+  Serial.print(recorder_name);
+  
+  
 }
 
 void loop() {
@@ -102,6 +109,38 @@ void Decode_recording(String input) {
   length_of_next_recording = String(intValue);
   Serial.print("length of next recording : ");
   Serial.println(length_of_next_recording);
+
+
+
+  //******************* prefix2 ************************
+  int intArray_recording[] = {};
+  byte _bits_recording[40];
+  for (byte i = 0; i < 5; i++) {
+    hex_to_int(beacon_byte[i + 6]);
+    intArray_recording[i] = intValue;
+
+    byte k = 7;
+    for (byte j = 0; j < 8; j++) {
+      int_to_bits();
+
+      _bits_recording[(i * 8) + j] = output_bits[k];
+      k--;
+      //Serial.print(_bits[(i * 8) + j]);
+    }
+  }
+ 
+
+  for (int i = 0; i < 36; i += 6) {
+    byte sixBits_recording = 0;
+    for (int j = 0; j < 6; j++) {
+      sixBits_recording <<= 1;
+      sixBits_recording |= _bits_recording[i + j];
+      //Serial.println(sixBits_telemetry);
+    }
+    prefix2 += lut[sixBits_recording];
+  }
+  Serial.print("prefix  2: ");
+  Serial.println(prefix2);  
 
   //************************current schedule+++++++++
 
@@ -175,7 +214,7 @@ void Decode_telemetry(String input) {
   //*****************beacon id********************
   hex_to_int(beacon_byte[2]);
   int_to_bits();
-  display_bits();
+  //display_bits();
 
   if (output_bits[7] == 0) {
     payload_type = "tlemetry payload";
@@ -213,7 +252,7 @@ void Decode_telemetry(String input) {
   //Serial.println("byte 3 ( box type)");
   hex_to_int(beacon_byte[3]);
   int_to_bits();
-  display_bits();
+  //display_bits();
 
   if (output_bits[4] == 1) {
     box_type = "Bat box ";
@@ -282,63 +321,31 @@ void Decode_telemetry(String input) {
 
 
   //******************* prefix ********************
-  // const char lut[] = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-";
-  // byte binaryArray[5] = {};  // example 36-bit binary array
-  // int intArray[] = {};
-  // for (byte i = 0; i < 5; i++) {
-  //   hex_to_int(beacon_byte[i + 6]);
-  //   binaryArray[i] = byte(intValue);
-  //   Serial.println(binaryArray[i]);
-  // }
 
-  // char sixBitArray[6];  // array to store 6-bit characters
-  // int index = 0;        // index to keep track of the position in the 6-bit array
+  int intArray_telemetry[] = {};
+  byte _bits_telemetry[40];
+  for (byte i = 0; i < 5; i++) {
+    hex_to_int(beacon_byte[i + 6]);
+    intArray_telemetry[i] = intValue;
 
-  // for (int i = 0; i < 5; i++) {                        // loop through each byte in the binary array
-  //   for (int j = 0; j < 6; j++) {                      // loop through each pair of 6 bits
-  //     byte bits = (binaryArray[i] >> (j * 6)) & 0x3F;  // extract 6 bits from the current position
-  //     sixBitArray[index] = lut[bits];                  // look up the corresponding 6-bit character from the lookup table and store it in the 6-bit array
-  //     index++;                                         // move to the next position in the 6-bit array
-  //   }
-  // }
+    byte k = 7;
+    for (byte j = 0; j < 8; j++) {
+      int_to_bits();
 
-  // // print the resulting 6-bit array
-  // for (int i = 0; i < 6; i++) {
-  //   Serial.print(sixBitArray[i]);
-  // }
-
-
-
-
-    int intArray[] = {};
-    byte _bits[40];
-    for (byte i = 0; i < 5; i++) {
-      hex_to_int(beacon_byte[i + 6]);
-      intArray[i] = intValue;
-
-
-      for (byte j = 0; j < 8; j++) {
-        int_to_bits();
-        _bits[(i * 8) + j] = output_bits[j];
-        Serial.print(_bits[(i * 8) + j]);
-      }
+      _bits_telemetry[(i * 8) + j] = output_bits[k];
+      k--;   
     }
-  Serial.println("");
-  const char lut[] = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-";
-
-  String characterString = "";
-
-  for (int i = 0; i < 36; i += 6) {
-    byte sixBits = 0;
-    for (int j = 0; j < 6; j++) {
-      sixBits <<= 1;
-      sixBits |= _bits[i + j];
-      Serial.println(sixBits);
-    }
-    characterString += lut[sixBits];
   }
-
-  Serial.println(characterString);
+  for (int i = 0; i < 36; i += 6) {
+    byte sixBits_telemetry = 0;
+    for (int j = 0; j < 6; j++) {
+      sixBits_telemetry <<= 1;
+      sixBits_telemetry |= _bits_telemetry[i + j];
+    }
+    prefix1 += lut[sixBits_telemetry];
+  }
+  Serial.print("prefix1 : ");
+  Serial.println(prefix1);
 }
 
 void hex_to_int(String input) {
