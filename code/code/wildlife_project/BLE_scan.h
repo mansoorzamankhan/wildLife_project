@@ -4,10 +4,11 @@
 #include <BLEUtils.h>
 #include <BLEScan.h>
 #include <BLEAdvertisedDevice.h>
-#define MAC " Address: 24:9f:28:d4:04:36"
+#define MAC " Address: 9c:25:be:10:69:27"
 String address = "";
-String rawData = "";
-String data = "";
+String raw_data = "";
+String _data = "";
+String payload_data[6];
 int scanTime = 5;  //In seconds
 BLEScan* pBLEScan;
 bool device_found = false;
@@ -21,19 +22,19 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
 
 
     //print devices that are scaned
-    //rawData = advertisedDevice.toString().c_str();
-    rawData = advertisedDevice.toString().c_str();  // extract the raw data from becon
+    //raw_data = advertisedDevice.toString().c_str();
+    raw_data = advertisedDevice.toString().c_str();  // extract the raw _data from becon
     // loop through each character in the input string
-    //Serial.println( rawData);
-    for (int i = 0; i < rawData.length(); i++) {
-      if (rawData.charAt(i) == ',') {                         // if a comma is found
-        parts[partIndex] = rawData.substring(commaIndex, i);  // parse the current part
+    //Serial.println( raw_data);
+    for (int i = 0; i < raw_data.length(); i++) {
+      if (raw_data.charAt(i) == ',') {                         // if a comma is found
+        parts[partIndex] = raw_data.substring(commaIndex, i);  // parse the current part
         commaIndex = i + 1;                                   // update the comma index
         partIndex++;                                          // move on to the next part
       }
     }
     // parse the last part (after the last comma)
-    parts[partIndex] = rawData.substring(commaIndex);
+    parts[partIndex] = raw_data.substring(commaIndex);
     // print the parsed adress
 
     address = parts[1];
@@ -44,9 +45,9 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
     //Serial.println(address);
     if (address == MAC) {  // compare the address
       device_found = true;
-      Serial.println("SM MINI found: ");
-      data = parts[2];
-      Serial.println(data);
+      Serial.println("SM MINI found: fetching payload ");
+      _data = parts[2];
+     // Serial.println(_data);
       partIndex = 0;
       commaIndex = 0;
     }

@@ -2,7 +2,7 @@
 #define __DECODE_BEACON_H__
 
 //definations
-String Manufacturing_Company = "Wildlife Acoustics, Inc.";
+String manufacturing_company = "Wildlife Acoustics, Inc.";
 //beacon id
 String TIME;
 int beaconID_int;
@@ -16,14 +16,14 @@ byte beacon_version[4];
 //box and serial
 String SD_capacity;
 String SD_used;
-String Temprature;
+String temperature;
 String battery_level;
-String Firmware_index;
+String firmware_index;
 String error_code;
 String recording_no;
-String TimeZone;
+String time_zone;
 String current_time;
-String Time_of_next_recording;
+String time_of_next_recording;
 String length_of_next_recording;
 String current_schedule;
 String Sampling_rate;
@@ -42,15 +42,24 @@ int int_beacon_byte_234[3];
 byte binary_beacon_byte_234[24];
 
 
-void Decode_recording(String input) {
-  void hex_to_int(String input);
+void display_bits(void);
+void time_conversion(unsigned int _time);
+void int_to_bits(void);
+void hex_to_int(String input);
+void Decode_telemetry(String input);
+void Decode_recording(String input);
+void Decode_type(String payload);
+
+void Decode_type(String payload) {
+
+  void hex_to_int(String payload);
   void int_to_bits(void);
   void time_conversion(unsigned int _time);
   void display_bits(void);
 
-  input.remove(0, 20);  // remove unncecessary data from received string
+  payload.remove(0, 20);  // remove unncecessary data from received string
   for (int i = 0; i < 26; i++) {
-    beacon_byte[i] = input.substring(i * 2, i * 2 + 2);
+    beacon_byte[i] = payload.substring(i * 2, i * 2 + 2);
   }
   for (int i = 0; i < 26; i++) {  // print char array
     Serial.print("[");
@@ -60,7 +69,7 @@ void Decode_recording(String input) {
   Serial.println("");
   // **************** manufacturer**************
   if (beacon_byte[0] == "30" && beacon_byte[1] == "07")
-    Serial.println(Manufacturing_Company);
+    Serial.println(manufacturing_company);
   else {
     return;
   }
@@ -69,18 +78,23 @@ void Decode_recording(String input) {
   int_to_bits();
   //display_bits();
   if (output_bits[7] == 1) {
-    payload_type = "Recording payload";
+    payload_type = "Recording_payload";
+    Serial.print("paylaod type : ");
+    Serial.println(payload_type);
+  } else if (output_bits[7] == 0) {
+    payload_type = "Telemetry_payload";
     Serial.print("paylaod type : ");
     Serial.println(payload_type);
   }
+}
 
-
+void Decode_recording(String input) {
   //******************** time zone *******************
   hex_to_int(beacon_byte[12]);
-  TimeZone = String(intValue * 0.25);
-  TimeZone = "UTC +"+TimeZone;
+  time_zone = String(intValue * 0.25);
+  time_zone = "UTC +" + time_zone;
   Serial.print("Time zone:UTC +");
-  Serial.println(TimeZone);
+  Serial.println(time_zone);
   //******************* current time *****************
   current_time = beacon_byte[16] + beacon_byte[15] + beacon_byte[14] + beacon_byte[13];
   hex_to_int(current_time);
@@ -90,12 +104,12 @@ void Decode_recording(String input) {
   Serial.println(current_time);
 
   //******************** time of next recording************
-  Time_of_next_recording = beacon_byte[20] + beacon_byte[19] + beacon_byte[18] + beacon_byte[17];
-  hex_to_int(Time_of_next_recording);
+  time_of_next_recording = beacon_byte[20] + beacon_byte[19] + beacon_byte[18] + beacon_byte[17];
+  hex_to_int(time_of_next_recording);
   time_conversion(intValue);
-  Time_of_next_recording = TIME;
+  time_of_next_recording = TIME;
   Serial.print("Time of next recording : ");
-  Serial.println(Time_of_next_recording);
+  Serial.println(time_of_next_recording);
 
   //***********length of next recording *****************
   length_of_next_recording = beacon_byte[23] + beacon_byte[22] + beacon_byte[21];
@@ -181,29 +195,6 @@ void Decode_recording(String input) {
 }
 void Decode_telemetry(String input) {
 
-  void hex_to_int(String input);
-  void int_to_bits(void);
-  void time_conversion(unsigned int _time);
-  void display_bits(void);
-  
-  input.remove(0, 20);  // remove unncecessary data from received string
-  for (int i = 0; i < 26; i++) {
-    beacon_byte[i] = input.substring(i * 2, i * 2 + 2);
-  }
-  for (int i = 0; i < 26; i++) {  // print char array
-    Serial.print("[");
-    Serial.print(beacon_byte[i]);
-    Serial.print("]");
-  }
-  Serial.println("");
-  //****************maunfacturig company ****************
-  //Serial.println("byte 0,1 (manufacturer) ");
-  if (beacon_byte[0] == "30" && beacon_byte[1] == "07")
-    Serial.println(Manufacturing_Company);
-  else {
-    return;
-  }
-
   //*****************beacon id********************
   hex_to_int(beacon_byte[2]);
   int_to_bits();
@@ -269,12 +260,12 @@ void Decode_telemetry(String input) {
   SD_used = String(intValue * 0.0625);
   Serial.print("Sd card used: ");
   Serial.println(SD_used);
-  //*************** Temprature     **************
-  Temprature = beacon_byte[17] + beacon_byte[16];
-  hex_to_int(Temprature);
-  Temprature = String(intValue * 0.25);
-  Serial.print("Temprature: ");
-  Serial.println(Temprature);
+  //*************** temperature     **************
+  temperature = beacon_byte[17] + beacon_byte[16];
+  hex_to_int(temperature);
+  temperature = String(intValue * 0.25);
+  Serial.print("temperature: ");
+  Serial.println(temperature);
   //*************** battery level **************
   battery_level = beacon_byte[19] + beacon_byte[18];
   hex_to_int(battery_level);
@@ -282,11 +273,11 @@ void Decode_telemetry(String input) {
   Serial.print("Battery level: ");
   Serial.println(battery_level);
   //***************firmware index******************
-  Firmware_index = beacon_byte[20];
-  hex_to_int(Firmware_index);
-  Firmware_index = String(intValue);
+  firmware_index = beacon_byte[20];
+  hex_to_int(firmware_index);
+  firmware_index = String(intValue);
   Serial.print("Firlware : ");
-  Serial.println(Firmware_index);
+  Serial.println(firmware_index);
   //**************** Error code *******************
   error_code = beacon_byte[22] + beacon_byte[21];
   Serial.print("error code : ");
@@ -359,8 +350,6 @@ void display_bits(void) {
   }
   Serial.println("");
 }
-
-
 
 
 #endif

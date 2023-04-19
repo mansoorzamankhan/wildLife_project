@@ -8,8 +8,8 @@
 #include <WiFiClientSecure.h>
 
 // WiFi credentials
-const char* ssid = "workplace";
-const char* password = "devomech12121";
+const char* ssid = ";-)";
+const char* password = "password";
 
 // MQTT server credentials
 const char* mqtt_server = "4513d12687ab46a0b58b0ab2ec75a85d.s2.eu.hivemq.cloud";

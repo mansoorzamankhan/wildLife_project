@@ -6,8 +6,10 @@
 #include <BLEAdvertisedDevice.h>
 #define MAC " Address: 24:9f:28:d4:04:36"
 String address = "";
-String rawData = "";
-String data = "";
+String raw_data = "";
+String _data = "";
+String payload_data[2];
+
 int scanTime = 5;  //In seconds
 BLEScan* pBLEScan;
 bool device_found = false;
@@ -21,19 +23,19 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
 
 
     //print devices that are scaned
-    //rawData = advertisedDevice.toString().c_str();
-    rawData = advertisedDevice.toString().c_str();  // extract the raw data from becon
+    //raw_data = advertisedDevice.toString().c_str();
+    raw_data = advertisedDevice.toString().c_str();  // extract the raw _data from becon
     // loop through each character in the input string
-    //Serial.println( rawData);
-    for (int i = 0; i < rawData.length(); i++) {
-      if (rawData.charAt(i) == ',') {                         // if a comma is found
-        parts[partIndex] = rawData.substring(commaIndex, i);  // parse the current part
-        commaIndex = i + 1;                                   // update the comma index
-        partIndex++;                                          // move on to the next part
+    //Serial.println( raw_data);
+    for (int i = 0; i < raw_data.length(); i++) {
+      if (raw_data.charAt(i) == ',') {                         // if a comma is found
+        parts[partIndex] = raw_data.substring(commaIndex, i);  // parse the current part
+        commaIndex = i + 1;                                    // update the comma index
+        partIndex++;                                           // move on to the next part
       }
     }
     // parse the last part (after the last comma)
-    parts[partIndex] = rawData.substring(commaIndex);
+    parts[partIndex] = raw_data.substring(commaIndex);
     // print the parsed adress
 
     address = parts[1];
@@ -42,11 +44,11 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
     commaIndex = 0;
 
     //Serial.println(address);
-    if (address == MAC) { // compare the address 
+    if (address == MAC) {  // compare the address
       device_found = true;
       Serial.println("SM MINI found: ");
-      data = parts[2];
-      Serial.println(data);
+      _data = parts[2];
+      Serial.println(_data);
       partIndex = 0;
       commaIndex = 0;
     }
@@ -67,13 +69,13 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   if (device_found == false) {      // if beacon device is found then stop scanning
-    for (byte i = 0; i < 1; i++) {  // scan again if the device is found to receive the second payload
+    for (byte i = 0; i < 2; i++) {  // scan again if the device is found to receive the second payload
       Serial.println("available devices: ");
-      BLEScanResults foundDevices = pBLEScan->start(scanTime, false);  // get data from found device
+      BLEScanResults foundDevices = pBLEScan->start(scanTime, false);  // get _data from found device
+        payload_data[i] = _data;
       Serial.println("Scan done!");
       pBLEScan->clearResults();  // delete results fromBLEScan buffer to release memory
       delay(2000);
     }
   }
 }
-

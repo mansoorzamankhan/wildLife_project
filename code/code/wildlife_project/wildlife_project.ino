@@ -3,9 +3,12 @@
 #include "decode_beacon.h"
 #include "BLE_scan.h"
 #include "MQTT_publisher.h"
-
+bool telemetry_detected = false;
+bool recording_detected = false;
 void setup() {
   Serial.begin(115200);
+  BLE_INIT();
+  BLE_SCAN();
   // MQTT publisher
   DECODE_BEACON();
   mqtt_Setup();
@@ -15,6 +18,12 @@ void setup() {
 }
 
 void loop() {
+  if (Serial.available() > 0) {
+    String inputString = Serial.readStringUntil('\n');
+    if (inputString == "restart") {
+      ESP.restart();
+    }
+  }
 }
 void BLE_INIT(void) {
   // beacon Scan
@@ -29,41 +38,57 @@ void BLE_INIT(void) {
 void BLE_SCAN(void) {
   // Beacon scan:
   if (device_found == false) {      // if beacon device is found then stop scanning
-    for (byte i = 0; i < 1; i++) {  // scan again if the device is found to receive the second payload
-      Serial.println("available devices: ");
+    for (byte i = 0; i < 6; i++) {  // scan again if the device is found to receive the second payload
       BLEScanResults foundDevices = pBLEScan->start(scanTime, false);  // get data from found device
-      Serial.println("Scan done!");
+      
+      payload_data[i] = _data;
       pBLEScan->clearResults();  // delete results fromBLEScan buffer to release memory
       delay(2000);
+      //Serial.println(payload_data[i]);
     }
+    Serial.println("Scan done!");
   }
 }
 void DECODE_BEACON(void) {
   //decode beacon data
-  Decode_telemetry(data_beacon1);
-  Decode_recording(data_beacon2);
+  for (byte i = 0; i < 6; i++) {
+    if (telemetry_detected == true && recording_detected == true) {
+      break;
+    }
+    Decode_type(payload_data[i]);
+    if (payload_type == "Telemetry_payload" && !telemetry_detected) {
+      Decode_telemetry(payload_data[i]);
+      telemetry_detected = true;
+    } else if (payload_type == "Recording_payload" && !recording_detected) {
+      Decode_recording(payload_data[i]);
+      recording_detected = true;
+    }
+  }
+ 
+
+
+
   recorder_name = prefix1 + prefix2;
   Serial.print("recorder name : ");
   Serial.println(recorder_name);
 }
 void MQTT_PUBLISH(void) {
-  send_MQTT_data("Manufacturing_Company", Manufacturing_Company);
+  send_MQTT_data("manufacturing_company", manufacturing_company);
   send_MQTT_data("bird", bird);
   send_MQTT_data("mic2", mic2);
   send_MQTT_data("box_type", box_type);
   send_MQTT_data("SD_capacity", SD_capacity);
-  send_MQTT_data("SD_used",SD_used);
-  send_MQTT_data("Temprature", Temprature);
+  send_MQTT_data("SD_used", SD_used);
+  send_MQTT_data("temperature", temperature);
   send_MQTT_data("battery_level", battery_level);
-  send_MQTT_data("Firmware_index", Firmware_index);
+  send_MQTT_data("firmware_index", firmware_index);
   send_MQTT_data("error_code", error_code);
   send_MQTT_data("recording_no", recording_no);
-  send_MQTT_data("TimeZone", TimeZone);
+  send_MQTT_data("time_zone", time_zone);
   send_MQTT_data("current_time", current_time);
-  send_MQTT_data("Time_of_next_recording", Time_of_next_recording);
+  send_MQTT_data("time_of_next_recording", time_of_next_recording);
   send_MQTT_data("length_of_next_recording", length_of_next_recording);
   send_MQTT_data("current_schedule", current_schedule);
   send_MQTT_data("Sampling_rate", Sampling_rate);
   send_MQTT_data("recorder_name", recorder_name);
-
 }
