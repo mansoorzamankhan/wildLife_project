@@ -14,7 +14,7 @@ const char* password = "devomech12121";
 // MQTT server credentials
 const char* mqtt_server = "4513d12687ab46a0b58b0ab2ec75a85d.s2.eu.hivemq.cloud";
 const int mqtt_port = 8883;
-const char* mqtt_topic = "wildlife_data";
+const char* mqtt_topic ;
 
 const char* mqtt_username = "Wildlife_project";
 const char* mqtt_password = "Abbasial2023";
@@ -65,7 +65,7 @@ void mqtt_Setup(void) {
 }
 
 
-void connectWifi(void) {
+void connect_Wifi(void) {
 
   // Connect to WiFi
   WiFi.begin(ssid, password);
@@ -92,16 +92,18 @@ void connect_MQTT(void) {
   }
 }
 
-void send_MQTT_data(void) {
+void send_MQTT_data(String topic,String data) {
   void connect_MQTT(void);
   // Generate some data to send
-  float data = random(0, 100);
+  
   // Convert data to string
-  String payload = String(data);
+  
   // Send data to MQTT broker
   if (client.connected()) {
-    client.publish(mqtt_topic, payload.c_str());
-    Serial.println("Data sent to MQTT broker");
+    
+    client.publish(topic.c_str(), data.c_str());
+    Serial.print(topic);
+    Serial.println(" sent to MQTT broker");
   } else {
     Serial.println("Failed to send data to MQTT broker");
   }

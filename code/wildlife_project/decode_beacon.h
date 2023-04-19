@@ -78,6 +78,7 @@ void Decode_recording(String input) {
   //******************** time zone *******************
   hex_to_int(beacon_byte[12]);
   TimeZone = String(intValue * 0.25);
+  TimeZone = "UTC +"+TimeZone;
   Serial.print("Time zone:UTC +");
   Serial.println(TimeZone);
   //******************* current time *****************

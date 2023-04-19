@@ -7,12 +7,17 @@
 void setup() {
   Serial.begin(115200);
   // MQTT publisher
+  DECODE_BEACON();
+  mqtt_Setup();
+  connect_Wifi();
+  connect_MQTT();
+  MQTT_PUBLISH();
 }
 
 void loop() {
 }
-void BLE_INIT(void){
-    // beacon Scan
+void BLE_INIT(void) {
+  // beacon Scan
   Serial.println("Scanning...");
   BLEDevice::init("");
   pBLEScan = BLEDevice::getScan();  //create new scan
@@ -20,7 +25,6 @@ void BLE_INIT(void){
   pBLEScan->setActiveScan(true);  //active scan uses more power, but get results faster
   pBLEScan->setInterval(100);
   pBLEScan->setWindow(99);  // less or equal setInterval value
-
 }
 void BLE_SCAN(void) {
   // Beacon scan:
@@ -40,11 +44,26 @@ void DECODE_BEACON(void) {
   Decode_recording(data_beacon2);
   recorder_name = prefix1 + prefix2;
   Serial.print("recorder name : ");
-  Serial.print(recorder_name);
+  Serial.println(recorder_name);
 }
-void MQTT_PUBLISHER(void) {
-  mqtt_Setup();
-  connectWifi();
-  connect_MQTT();
-  send_MQTT_data();  
+void MQTT_PUBLISH(void) {
+  send_MQTT_data("Manufacturing_Company", Manufacturing_Company);
+  send_MQTT_data("bird", bird);
+  send_MQTT_data("mic2", mic2);
+  send_MQTT_data("box_type", box_type);
+  send_MQTT_data("SD_capacity", SD_capacity);
+  send_MQTT_data("SD_used",SD_used);
+  send_MQTT_data("Temprature", Temprature);
+  send_MQTT_data("battery_level", battery_level);
+  send_MQTT_data("Firmware_index", Firmware_index);
+  send_MQTT_data("error_code", error_code);
+  send_MQTT_data("recording_no", recording_no);
+  send_MQTT_data("TimeZone", TimeZone);
+  send_MQTT_data("current_time", current_time);
+  send_MQTT_data("Time_of_next_recording", Time_of_next_recording);
+  send_MQTT_data("length_of_next_recording", length_of_next_recording);
+  send_MQTT_data("current_schedule", current_schedule);
+  send_MQTT_data("Sampling_rate", Sampling_rate);
+  send_MQTT_data("recorder_name", recorder_name);
+
 }
