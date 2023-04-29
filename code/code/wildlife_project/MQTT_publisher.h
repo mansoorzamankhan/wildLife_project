@@ -2,14 +2,12 @@
 #define __MQTT_PUBLISHER_H__
 
 
-
+#include "GSM.h"
 #include <WiFi.h>
 #include <PubSubClient.h>
-#include <WiFiClientSecure.h>
+// #include <WiFiClientSecure.h>
 
-// WiFi credentials
-const char* ssid = ";-)";
-const char* password = "password";
+
 
 // MQTT server credentials
 const char* mqtt_server = "4513d12687ab46a0b58b0ab2ec75a85d.s2.eu.hivemq.cloud";
@@ -52,7 +50,7 @@ mRGunUHBcnWEvgJBQl9nJEiU0Zsnvgc/ubhPgXRR4Xq37Z0j4r7g1SgEEzwxA57d
 emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
 -----END CERTIFICATE-----
 )EOF";
-WiFiClientSecure espClient;
+TinyGsmClientSecure espClient(modem);
 PubSubClient client(espClient);
 
 void mqtt_setup(void);
@@ -60,23 +58,16 @@ void mqtt_setup(void);
 
 void mqtt_Setup(void) {
 
-  espClient.setCACert(mqtt_server_CA);
+  espClient.setCertificate(mqtt_server_CA);
   client.setServer(mqtt_server, mqtt_port);
 }
-
-
-void connect_Wifi(void) {
-
-  // Connect to WiFi
-  WiFi.begin(ssid, password);
-  Serial.print("Connecting to WiFi.");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.println("Connected to WiFi");
+void Connect_GSM(void)
+{
+  modemPowerOn();
+  GSM_connection();
 }
+
+
 void connect_MQTT(void) {
 
   //connect to mqtt broker

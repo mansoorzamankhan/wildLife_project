@@ -12,7 +12,7 @@ void setup() {
   // MQTT publisher
   DECODE_BEACON();
   mqtt_Setup();
-  connect_Wifi();
+  Connect_GSM();
   connect_MQTT();
   MQTT_PUBLISH();
 }
@@ -27,7 +27,7 @@ void loop() {
 }
 void BLE_INIT(void) {
   // beacon Scan
-  Serial.println("Scanning...");
+  Serial.println("Scanning beacon ...");
   BLEDevice::init("");
   pBLEScan = BLEDevice::getScan();  //create new scan
   pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());

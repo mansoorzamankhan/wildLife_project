@@ -20,7 +20,6 @@ const char gprsPass[] = "";
 
 #include <TinyGsmClient.h>
 #include <SPI.h>
-#include <SD.h>
 #include <Ticker.h>
 
 #ifdef DUMP_AT_COMMANDS
@@ -30,8 +29,7 @@ const char gprsPass[] = "";
 #else
   TinyGsm modem(SerialAT);
 #endif
-TinyGsmClientSecure client(modem);
-PubSubClient mqtt(client);
+
 
 // LilyGO T-SIM7000G Pinout
 #define UART_BAUD           115200
