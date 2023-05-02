@@ -8,7 +8,7 @@
 String address = "";
 String raw_data = "";
 String _data = "";
-String payload_data[6];
+String payload_data[8];
 int scanTime = 5;  //In seconds
 BLEScan* pBLEScan;
 bool device_found = false;
