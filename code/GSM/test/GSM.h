@@ -1,6 +1,6 @@
 #ifndef __GPRS_H__
   #define __GPRS_H__
-#define  TINY_GSM_MODEM_SIM7000SSL
+#define  TINY_GSM_MODEM_SIM7080
 #define TINY_GSM_RX_BUFFER 1024 // Set RX buffer to 1Kb
 
 #define SerialAT Serial1
@@ -14,7 +14,7 @@
 #define GSM_PIN ""
 
 // Your GPRS credentials, if any
-const char apn[]  = "internet.v6.telekom";     //SET TO YOUR APN
+const char apn[]  = "hologram";     //SET TO YOUR APN
 const char gprsUser[] = "";
 const char gprsPass[] = "";
 
@@ -22,7 +22,7 @@ const char gprsPass[] = "";
 #include <SPI.h>
 #include <SD.h>
 #include <Ticker.h>
-
+#include <PubSubClient.h>
 #ifdef DUMP_AT_COMMANDS
   #include <StreamDebugger.h>
   StreamDebugger debugger(SerialAT, SerialMon);
@@ -30,7 +30,7 @@ const char gprsPass[] = "";
 #else
   TinyGsm modem(SerialAT);
 #endif
-TinyGsmClientSecure client(modem);
+TinyGsmClient client(modem);
 PubSubClient mqtt(client);
 
 // LilyGO T-SIM7000G Pinout

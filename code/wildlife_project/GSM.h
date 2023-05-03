@@ -6,7 +6,8 @@
 #define SerialAT Serial1
 // Set serial for debug console (to the Serial Monitor, default speed 115200)
 #define SerialMon Serial
-
+#define TINY_GSM_USE_GPRS true
+#define TINY_GSM_USE_WIFI false
 // See all AT commands, if wanted
 // #define DUMP_AT_COMMANDS
 
