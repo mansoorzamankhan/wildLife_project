@@ -44,13 +44,11 @@ void setup() {
 
   // set notification call-back function
   sntp_set_time_sync_notification_cb(timeavailable);
-    sntp_servermode_dhcp(1);  
+  sntp_servermode_dhcp(1);
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
   Connect_wifi();
-   printLocalTime();
-   disconect_wifi();
-
-
+  printLocalTime();
+  disconect_wifi();
 }
 
 void loop() {

@@ -2,7 +2,8 @@
 #include <TimeLib.h>
 #include "decode_beacon.h"
 #include "BLE_scan.h"
-#include "MQTT_publisher.h"
+#include "MQTT_publisher_GSM.h"
+#include "MQTT_publisher_WIFI.h"
 bool telemetry_detected = false;
 bool recording_detected = false;
 void setup() {
