@@ -60,7 +60,7 @@ void mqtt_Setup(void) {
   espClient.setCertificate(mqtt_server_CA);
   client.setServer(mqtt_server, mqtt_port);
 }
-void Connect_GSM(void)
+void connect_GSM(void)
 {
   modemPowerOn();
   GSM_connection();

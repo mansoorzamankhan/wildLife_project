@@ -1,21 +1,19 @@
 
+#include <EEPROM.h>
+int flag_address = 0;  // address in the EEPROM to write to
+bool published_flag = LOW ;
 #include <TimeLib.h>
 #include "decode_beacon.h"
 #include "BLE_scan.h"
-#include "MQTT_publisher_GSM.h"
+#include "sleep.h"
+//#include "MQTT_publisher_GSM.h"
 #include "MQTT_publisher_WIFI.h"
 bool telemetry_detected = false;
 bool recording_detected = false;
 void setup() {
   Serial.begin(115200);
   BLE_INIT();
-  BLE_SCAN();
-  // MQTT publisher
-  DECODE_BEACON();
   mqtt_Setup();
-  Connect_GSM();
-  connect_MQTT();
-  MQTT_PUBLISH();
 }
 
 void loop() {
@@ -25,23 +23,31 @@ void loop() {
       ESP.restart();
     }
   }
+  BLE_SCAN();
+  DECODE_BEACON();
+  EEPROM.get(flag_address,published_flag);
+  if (((int)hour() >= wakeup_hour && (int)minute() > wakeup_minute) &&  published_flag== LOW) {
+    connect_Wifi();
+    connect_MQTT();
+    MQTT_PUBLISH();
+    published_flag = HIGH;
+    save_flag(published_flag);
+  } else {
+    wakeup_reason();
+    set_RTC_and_sleep_time();
+    go_deep_sleep();
+    published_flag = LOW;
+    save_flag(published_flag);
+  }
+  //Connect_GSM();
 }
-void BLE_INIT(void) {
-  // beacon Scan
-  Serial.println("Scanning beacon ...");
-  BLEDevice::init("");
-  pBLEScan = BLEDevice::getScan();  //create new scan
-  pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
-  pBLEScan->setActiveScan(true);  //active scan uses more power, but get results faster
-  pBLEScan->setInterval(100);
-  pBLEScan->setWindow(99);  // less or equal setInterval value
-}
+
 void BLE_SCAN(void) {
   // Beacon scan:
-  if (device_found == false) {      // if beacon device is found then stop scanning
-    for (byte i = 0; i < 6; i++) {  // scan again if the device is found to receive the second payload
+  if (device_found == false) {                                         // if beacon device is found then stop scanning
+    for (byte i = 0; i < 6; i++) {                                     // scan again if the device is found to receive the second payload
       BLEScanResults foundDevices = pBLEScan->start(scanTime, false);  // get data from found device
-      
+
       payload_data[i] = _data;
       pBLEScan->clearResults();  // delete results fromBLEScan buffer to release memory
       delay(2000);
@@ -65,13 +71,18 @@ void DECODE_BEACON(void) {
       recording_detected = true;
     }
   }
- 
+
 
 
 
   recorder_name = prefix1 + prefix2;
   Serial.print("recorder name : ");
   Serial.println(recorder_name);
+}
+void save_flag(bool value) {
+  EEPROM.begin(EEPROM.length());  // initialize the EEPROM
+  EEPROM.put(flag_address, value);  // write the value to the EEPROM
+  EEPROM.commit();             // save the changes
 }
 void MQTT_PUBLISH(void) {
   send_MQTT_data("manufacturing_company", manufacturing_company);
