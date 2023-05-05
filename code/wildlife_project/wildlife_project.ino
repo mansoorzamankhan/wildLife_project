@@ -25,6 +25,7 @@ void loop() {
   }
   BLE_SCAN();
   DECODE_BEACON();
+  set_RTC_and_sleep_time();
   EEPROM.get(flag_address,published_flag);
   if (((int)hour() >= wakeup_hour && (int)minute() > wakeup_minute) &&  published_flag== LOW) {
     connect_Wifi();
@@ -34,7 +35,7 @@ void loop() {
     save_flag(published_flag);
   } else {
     wakeup_reason();
-    set_RTC_and_sleep_time();
+    
     go_deep_sleep();
     published_flag = LOW;
     save_flag(published_flag);
