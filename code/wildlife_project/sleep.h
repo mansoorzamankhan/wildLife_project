@@ -1,9 +1,9 @@
 #ifndef _SLEEP_H_
 #define _SLEEP_H_
-
+#include "decode_beacon.h"
 #include <ESP32Time.h>
-#define wakeup_hour 11
-#define wakeup_minute 31
+#define wakeup_hour 18
+#define wakeup_minute 30
 #define HOURS 11
 #define MINUTES 30
 #define SECOND 30
@@ -35,19 +35,22 @@ void wakeup_reason() {
 
 
       //rtc.setTime(1609459200);  // 1st Jan 2021 00:00:00
-      //rtc.offset = 7200; // change offset value
+      
 
       break;
   }
 }
 void set_RTC_and_sleep_time() {
-  rtc.setTime(SECOND, MINUTES, HOURS, DAY, MONTH, YEAR);  // 17th Jan 2021 15:24:30
-  if (HOURS <= wakeup_hour && MINUTES < wakeup_minute) {
+  //rtc.offset = 7200; // GMT +2
+  rtc.setTime(current_second, current_minute,current_hour,current_day, current_month, current_year);  // 17th Jan 2021 15:24:30
+  if (current_hour <= wakeup_hour && current_minute< wakeup_minute) {
 
-    TIME_TO_SLEEP_SEC = ((wakeup_hour - HOURS) * 3600) + ((wakeup_minute - MINUTES) * 60);
-  } else if (HOURS > wakeup_hour && MINUTES < wakeup_minute) {
+    TIME_TO_SLEEP_SEC = ((wakeup_hour - current_hour) * 3600) + ((wakeup_minute -current_minute) * 60);
+    Serial.println(TIME_TO_SLEEP_SEC);
+  } else if (current_hour> wakeup_hour && current_minute < wakeup_minute) {
 
-    TIME_TO_SLEEP_SEC = ((HOURS + (HOURS - wakeup_hour)) * 3600) + ((wakeup_minute - MINUTES) * 60);
+    TIME_TO_SLEEP_SEC = ((current_hour + (current_hour - wakeup_hour)) * 3600) + ((wakeup_minute - current_minute) * 60);
+    Serial.println(TIME_TO_SLEEP_SEC);
   }
 }
 void go_deep_sleep() {

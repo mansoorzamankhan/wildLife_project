@@ -45,7 +45,7 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
     //Serial.println(address);
     if (address == MAC) {  // compare the address
       device_found = true;
-      Serial.println("SM MINI found: fetching payload ");
+      Serial.println("SM MINI found");
       _data = parts[2];
      // Serial.println(_data);
       partIndex = 0;
@@ -55,7 +55,7 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
 };
 void BLE_INIT(void) {
   // beacon Scan
-  Serial.println("Scanning beacon ...");
+
   BLEDevice::init("");
   pBLEScan = BLEDevice::getScan();  //create new scan
   pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
