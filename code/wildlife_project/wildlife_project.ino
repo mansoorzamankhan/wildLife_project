@@ -14,9 +14,9 @@ void setup() {
   Serial.begin(115200);
   // Initialize the EEPROM with a size of 512 bytes
   EEPROM.begin(512);
- //BLE initialization 
+  //BLE initialization
   BLE_INIT();
-  //MQTT setup initialization 
+  //MQTT setup initialization
   mqtt_Setup();
 }
 
@@ -29,14 +29,14 @@ void loop() {
   }
 
 
-  //BLE_SCAN();
-  //DECODE_BEACON();
-  published_flag = EEPROM.read(flag_address);//get data from eepronm for published flag 
-  //if time passes from 6AM  and no data is pubished yet then publish data 
+  BLE_SCAN();
+  DECODE_BEACON();
+  published_flag = EEPROM.read(flag_address);//get data from eepronm for published flag
+  //if time passes from 6AM  and no data is pubished yet then publish data
   Serial.println(current_hour);
-   Serial.println(current_minute);
-  
-  if ( current_hour>=wakeup_hour && current_minute >= wakeup_minute ) {
+  Serial.println(current_minute);
+
+  if ( current_hour >= wakeup_hour && current_minute >= wakeup_minute ) {
     Serial.println("posting time  already passed,  post flag low ");
     connect_Wifi();
     connect_MQTT();
@@ -46,14 +46,18 @@ void loop() {
     EEPROM.write(flag_address, published_flag);
     EEPROM.commit();
     go_deep_sleep();
+    // after waking up from sleep
+    published_flag = false; // set the published flag low inorder to publish the data again
+    EEPROM.write(flag_address, published_flag);
+    EEPROM.commit();
 
   } else {
     Serial.println("going to sleep without posting  ");
     set_RTC_and_sleep_time();
     wakeup_reason();
     go_deep_sleep();
-    // after waking up from sleep 
-    published_flag = false; // set the published flag low inorder to publish the data again 
+    // after waking up from sleep
+    published_flag = false; // set the published flag low inorder to publish the data again
     EEPROM.write(flag_address, published_flag);
     EEPROM.commit();
   }

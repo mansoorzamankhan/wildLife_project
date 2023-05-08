@@ -2,11 +2,11 @@
 #define _SLEEP_H_
 #include "decode_beacon.h"
 #include <ESP32Time.h>
-#define wakeup_hour 11
-#define wakeup_minute 30
+#define wakeup_hour 6
+#define wakeup_minute 00
 
 #define uS_TO_S_FACTOR 1000000ULL   /* Conversion factor for micro seconds to seconds */
-unsigned int TIME_TO_SLEEP_SEC = 0; /* Time ESP32 will go to sleep (in seconds) */
+unsigned long int TIME_TO_SLEEP_SEC = 0; /* Time ESP32 will go to sleep (in seconds) */
 ESP32Time rtc;
 
 
@@ -37,15 +37,16 @@ void wakeup_reason() {
 }
 void set_RTC_and_sleep_time() {
   //rtc.offset = 7200; // GMT +2
-  rtc.setTime(current_second, current_minute,current_hour,current_day, current_month, current_year);  // 17th Jan 2021 15:24:30
+  rtc.setTime(current_second, current_minute,current_hour,current_day, current_month, current_year);  
   if (current_hour < wakeup_hour && current_minute>= wakeup_minute) {
 
     TIME_TO_SLEEP_SEC = ((wakeup_hour - current_hour) * 3600) + ((wakeup_minute -current_minute) * 60);
     Serial.println(TIME_TO_SLEEP_SEC);
   } else if (current_hour>= wakeup_hour && current_minute >= wakeup_minute) {
 
-    TIME_TO_SLEEP_SEC = (24-(current_hour - wakeup_hour) * 3600) + ((wakeup_minute - current_minute) * 60);
-    Serial.println(TIME_TO_SLEEP_SEC);
+    TIME_TO_SLEEP_SEC = ((24-(current_hour - wakeup_hour)) * 3600) + ((wakeup_minute - current_minute) * 60);
+    Serial.print("going to sleep for hours = ");
+    Serial.println(TIME_TO_SLEEP_SEC/3600);
   }
 }
 void go_deep_sleep() {

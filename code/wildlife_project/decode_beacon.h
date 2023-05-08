@@ -1,7 +1,7 @@
 #ifndef __DECODE_BEACON_H__
 #define __DECODE_BEACON_H__
-int current_hour = 11;
-int current_minute = 16;
+int current_hour ;
+int current_minute ;
 int current_second;
 int current_day;
 int current_month;
