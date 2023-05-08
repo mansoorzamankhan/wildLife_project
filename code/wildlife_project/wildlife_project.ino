@@ -45,9 +45,10 @@ void loop() {
     EEPROM.commit();
   } else {
     Serial.println("data already posted today ");
-    go_deep_sleep();
     wakeup_reason();
-    published_flag = false;
+    go_deep_sleep();
+    // after waking up from sleep 
+    published_flag = false; // set the published flag low inorder to publish the data again 
     EEPROM.write(flag_address, published_flag);
     EEPROM.commit();
   }

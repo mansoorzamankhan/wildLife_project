@@ -1,11 +1,11 @@
 #ifndef __DECODE_BEACON_H__
 #define __DECODE_BEACON_H__
-uint8_t current_hour ;
-uint8_t current_minute ;
-uint8_t current_second ;
-uint8_t current_day ;
-uint8_t current_month ;
-uint8_t  current_year ;
+int current_hour;
+int current_minute;
+int current_second;
+int current_day;
+int current_month;
+int current_year;
 //definations
 String manufacturing_company = "Wildlife Acoustics, Inc.";
 //beacon id
@@ -105,12 +105,12 @@ void Decode_recording(String input) {
   hex_to_int(current_time);
   time_conversion(intValue);
   current_time = TIME;
-   current_hour = hour();
-   current_minute = minute();
-   current_second = second();
-   current_day = day();
-   current_month = month();
-    current_year = year();
+  current_hour = String(hour()).toInt();
+  current_minute = String(minute()).toInt();
+  current_second = String(second()).toInt();
+  current_day = String(day()).toInt();
+  current_month = String(month()).toInt();
+  current_year = String(year()).toInt();
   Serial.print("Current time : ");
   Serial.println(current_time);
 
