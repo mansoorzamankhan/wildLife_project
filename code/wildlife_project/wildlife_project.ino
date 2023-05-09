@@ -27,17 +27,17 @@ void loop() {
       ESP.restart();
     }
   }
-
-
   BLE_SCAN();
   DECODE_BEACON();
-  published_flag = EEPROM.read(flag_address);//get data from eepronm for published flag
+  published_flag = EEPROM.read(flag_address);  //get data from eepronm for published flag
+  Serial.print("flag status ");
+  Serial.println(published_flag);
   //if time passes from 6AM  and no data is pubished yet then publish data
-  Serial.println(current_hour);
-  Serial.println(current_minute);
 
-  if ( current_hour >= wakeup_hour && current_minute >= wakeup_minute ) {
-    Serial.println("posting time  already passed,  post flag low ");
+  if ((current_hour >= wakeup_hour && current_minute >= wakeup_minute) && published_flag == false) {
+    Serial.println("posting time passed, checking flag status..");
+    Serial.print("flag status ");
+    Serial.println(published_flag);
     connect_Wifi();
     connect_MQTT();
     MQTT_PUBLISH();
@@ -47,7 +47,7 @@ void loop() {
     EEPROM.commit();
     go_deep_sleep();
     // after waking up from sleep
-    published_flag = false; // set the published flag low inorder to publish the data again
+    published_flag = false;  // set the published flag low inorder to publish the data again
     EEPROM.write(flag_address, published_flag);
     EEPROM.commit();
 
@@ -57,7 +57,7 @@ void loop() {
     wakeup_reason();
     go_deep_sleep();
     // after waking up from sleep
-    published_flag = false; // set the published flag low inorder to publish the data again
+    published_flag = false;  // set the published flag low inorder to publish the data again
     EEPROM.write(flag_address, published_flag);
     EEPROM.commit();
   }
