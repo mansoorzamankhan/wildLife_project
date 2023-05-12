@@ -29,13 +29,14 @@ void loop() {
   }
   BLE_SCAN();
   DECODE_BEACON();
+  Serial.println("*********************************************");
   published_flag = EEPROM.read(flag_address);  //get data from eepronm for published flag
   Serial.print("flag status ");
   Serial.println(published_flag);
   //if time passes from 6AM  and no data is pubished yet then publish data
 
   if ((current_hour >= wakeup_hour && current_minute >= wakeup_minute) && published_flag == false) {
-    Serial.println("posting time passed, checking flag status..");
+    Serial.println("posting time, checking flag status..");
     Serial.print("flag status ");
     Serial.println(published_flag);
     connect_Wifi();
@@ -54,8 +55,9 @@ void loop() {
   } else {
     Serial.println("going to sleep without posting  ");
     set_RTC_and_sleep_time();
-    wakeup_reason();
+    
     go_deep_sleep();
+    wakeup_reason();
     // after waking up from sleep
     published_flag = false;  // set the published flag low inorder to publish the data again
     EEPROM.write(flag_address, published_flag);

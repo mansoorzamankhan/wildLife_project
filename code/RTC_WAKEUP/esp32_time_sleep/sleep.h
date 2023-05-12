@@ -3,7 +3,7 @@
 
 #include <ESP32Time.h>
 #define wakeup_hour 11
-#define wakeup_minute 31
+#define wakeup_minute 32
 #define HOURS 11
 #define MINUTES 30
 #define SECOND 30
