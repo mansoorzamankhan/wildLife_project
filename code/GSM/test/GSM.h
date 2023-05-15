@@ -35,10 +35,10 @@ PubSubClient mqtt(client);
 
 // LilyGO T-SIM7000G Pinout
 #define UART_BAUD           115200
-#define PIN_DTR             25
-#define PIN_TX              27
-#define PIN_RX              26
-#define PWR_PIN             4
+#define PIN_DTR             18
+#define PIN_TX              1
+#define PIN_RX              3
+#define PWR_PIN             19
 void modemPowerOn();
 void modemPowerOff();
 void modemRestart();

@@ -1,7 +1,9 @@
 
 #include <EEPROM.h>
 #define flag_address 0  // address in the EEPROM to write to
+#define day_adress 4
 bool published_flag = false;
+int dayOfPosting = 0;
 #include <TimeLib.h>
 #include "decode_beacon.h"
 #include "BLE_scan.h"
@@ -31,31 +33,42 @@ void loop() {
   DECODE_BEACON();
   Serial.println("*********************************************");
   published_flag = EEPROM.read(flag_address);  //get data from eepronm for published flag
-  Serial.print("flag status ");
+  Serial.print("published flag status ");
   Serial.println(published_flag);
-  //if time passes from 6AM  and no data is pubished yet then publish data
 
+  dayOfPosting = EEPROM.read(day_address);  // det data from eeprom for day of last posting
+  Serial.print("last day when data was posted  ");
+  Serial.println(dayOfPosting);
+  if (dayOfPosting != current_day) {  // if its not  the same day after posting then lower the flag to publish data again
+    published_flag = false;
+
+  } else {  // if its same day them
+    Serial.println("data was already posted today ");
+  }
+
+  //if time passes from 6AM  and no data is pubished yet then publish data
   if ((current_hour >= wakeup_hour && current_minute >= wakeup_minute) && published_flag == false) {
-    Serial.println("posting time, checking flag status..");
-    Serial.print("flag status ");
+    Serial.println("its posting time, checking flag status..");
+    Serial.print("published flag status ");
     Serial.println(published_flag);
     connect_Wifi();
     connect_MQTT();
     MQTT_PUBLISH();
     set_RTC_and_sleep_time();
+    // set the published flag and save it to eeprom
     published_flag = true;
     EEPROM.write(flag_address, published_flag);
     EEPROM.commit();
-    go_deep_sleep();
-    // after waking up from sleep
-    published_flag = false;  // set the published flag low inorder to publish the data again
-    EEPROM.write(flag_address, published_flag);
+    //save the date in eeprom
+    dayOfPosting = current_day;
+    EEPROM.write(day_address, dayOfPosting);
     EEPROM.commit();
+    go_deep_sleep();
 
   } else {
     Serial.println("going to sleep without posting  ");
     set_RTC_and_sleep_time();
-    
+
     go_deep_sleep();
     wakeup_reason();
     // after waking up from sleep
