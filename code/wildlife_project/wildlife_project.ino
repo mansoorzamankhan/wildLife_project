@@ -3,7 +3,7 @@
 #define flag_address 0  // address in the EEPROM to write to
 #define day_adress 4
 bool published_flag = false;
-int dayOfPosting = 0;
+uint8_t dayOfPosting = 0;
 #include <TimeLib.h>
 #include "decode_beacon.h"
 #include "BLE_scan.h"

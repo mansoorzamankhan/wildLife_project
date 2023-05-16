@@ -2,7 +2,7 @@
 #define _SLEEP_H_
 #include "decode_beacon.h"
 #include <ESP32Time.h>
-#define wakeup_hour 12
+#define wakeup_hour 06
 #define wakeup_minute 00
 
 #define uS_TO_S_FACTOR 1000000ULL   /* Conversion factor for micro seconds to seconds */
