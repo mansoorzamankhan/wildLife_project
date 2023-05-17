@@ -1,7 +1,7 @@
 
 #include <EEPROM.h>
 #define flag_address 0  // address in the EEPROM to write to
-#define day_adress 4
+#define day_address 4
 bool published_flag = false;
 uint8_t dayOfPosting = 0;
 #include <TimeLib.h>
