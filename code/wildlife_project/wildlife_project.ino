@@ -110,31 +110,15 @@ void DECODE_BEACON(void) {
     }
   }
 
-
-
-
   recorder_name = prefix1 + prefix2;
   Serial.print("recorder name : ");
   Serial.println(recorder_name);
 }
 
 void MQTT_PUBLISH(void) {
-  send_MQTT_data("manufacturing_company", manufacturing_company);
-  send_MQTT_data("bird", bird);
-  send_MQTT_data("mic2", mic2);
-  send_MQTT_data("box_type", box_type);
-  send_MQTT_data("SD_capacity", SD_capacity);
-  send_MQTT_data("SD_used", SD_used);
-  send_MQTT_data("temperature", temperature);
-  send_MQTT_data("battery_level", battery_level);
-  send_MQTT_data("firmware_index", firmware_index);
-  send_MQTT_data("error_code", error_code);
-  send_MQTT_data("recording_no", recording_no);
-  send_MQTT_data("time_zone", time_zone);
-  send_MQTT_data("current_time", current_time);
-  send_MQTT_data("time_of_next_recording", time_of_next_recording);
-  send_MQTT_data("length_of_next_recording", length_of_next_recording);
-  send_MQTT_data("current_schedule", current_schedule);
-  send_MQTT_data("Sampling_rate", Sampling_rate);
-  send_MQTT_data("recorder_name", recorder_name);
+  String MQTT_data = Manufacturing_Company + "," + bird + "," + mic2 + "," + box_type + "," + SD_capacity + "," + SD_used
+                     + "," + Temprature + "," + battery_level + "," + Firmware_index + "," + error_code + "," + recording_no + "," + TimeZone
+                     + "," + current_time + "," + Time_of_next_recording + "," + current_schedule + "," + Sampling_rate + "," + recorder_name;
+
+  send_MQTT_data(recorder_name, MQTT_data);
 }
