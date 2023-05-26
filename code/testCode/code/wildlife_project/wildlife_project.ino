@@ -3,15 +3,18 @@
 #include "decode_beacon.h"
 #include "BLE_scan.h"
 #include "MQTT_publisher.h"
-
+#include "sleep.h"
 void setup() {
   Serial.begin(115200);
   // MQTT publisher
+  
   DECODE_BEACON();
   mqtt_Setup();
   connect_Wifi();
   connect_MQTT();
   MQTT_PUBLISH();
+  set_RTC_and_sleep_time();
+  go_deep_sleep();
 }
 
 void loop() {

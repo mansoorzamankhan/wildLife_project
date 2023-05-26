@@ -30,7 +30,7 @@ String Sampling_rate;
 String prefix1;
 String prefix2;
 String recorder_name;
-String data_beacon1 = " manufacturer data: 30074110692786476294800003029000640069141600001f0000";
+String data_beacon1 = " manufacturer data: 30074110692786476291800003029000640069141600001f0000";
 String data_beacon2 = " manufacturer data: 3007c110692705095b70000004447cc62bd871c62b183102010b";
 const char lut[] = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-";
 
