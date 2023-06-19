@@ -1,157 +1,161 @@
 #ifndef __GPRS_H__
   #define __GPRS_H__
-  
-  // GSM module specification
-  #define TINY_GSM_MODEM_SIM800
-  #include <TinyGsmClient.h> //https://github.com/vshymanskyy/TinyGSM
-  
-  // TTGO T-Call pin definitions
-  #define MODEM_RST		  5
-  #define MODEM_PWRKEY            4
-  #define MODEM_POWER_ON          23
-  #define MODEM_TX                27
-  #define MODEM_RX                26
-  #define I2C_SDA                 21
-  #define I2C_SCL                 22
-  #define MODEM_BAUD_RATE         115200  //115.2 Kb/s baud rate
-  
-  // GPRS init states
-  #define GPRS_RESET              0
-  #define GPRS_START_SERIAL       1
-  #define GPRS_INIT_MODULE        2
-  #define GPRS_INIT_MODEM         3
-  #define GPRS_CONNECT            4
-  #define GPRS_READY_             5
-  
-  // GPRS data
-  #define GPRS_USER               ""
-  #define GPRS_PASS               ""
-  #define APN                     "jazzconnect.mobilinkworld.com"      // APN (google the apn of your network provider in your country)
-  #define SIM_PIN                 ""      // If SIM is locked, provide the PUK code
-  
-  // Timeout connection before automatically restarting
-  #define GPRS_CONN_TIMEOUT       10000UL // 10 seconds
-  
-  // Hardware Serial for builtin GSM Module
-  #define SerialAT Serial1 
-  
-  TinyGsm modem(SerialAT);
-  TinyGsmClient client(modem);
-  
-  void setup_modem();
-  void GPRS_init();
-  void GPRS_wake_up();
-  void GPRS_put_to_sleep();
-  bool GPRS_connectivity_status();
+#define TINY_GSM_MODEM_SIM7000SSL
+#define TINY_GSM_RX_BUFFER 1024 // Set RX buffer to 1Kb
 
-  // Setup variables
-  unsigned long GPRS_last_update = 0;
-  int  gprs_setup_state = 0;
-  bool serial_ready  = false;
-  bool module_ready  = false;
-  bool connect_ready = false;
-  
-  // Functions' declarations
-  void GPRS_init(){
-    switch(gprs_setup_state){
-      case GPRS_RESET:{
-        
-        gprs_setup_state = 0;
-        serial_ready  = false;
-        module_ready  = false;
-        connect_ready = false;
-        
-        gprs_setup_state = GPRS_START_SERIAL;
-        GPRS_last_update = millis();
+#define SerialAT Serial1
+// Set serial for debug console (to the Serial Monitor, default speed 115200)
+#define SerialMon Serial
+
+// See all AT commands, if wanted
+// #define DUMP_AT_COMMANDS
+
+// set GSM PIN, if any
+#define GSM_PIN ""
+
+// Your GPRS credentials, if any
+const char apn[]  = "APN internet.nbiot.telekom.de";     //SET TO YOUR APN
+const char gprsUser[] = "";
+const char gprsPass[] = "";
+
+#include <TinyGsmClient.h>
+#include <SPI.h>
+#include <SD.h>
+#include <Ticker.h>
+
+#ifdef DUMP_AT_COMMANDS
+  #include <StreamDebugger.h>
+  StreamDebugger debugger(SerialAT, SerialMon);
+  TinyGsm modem(debugger);
+#else
+  TinyGsm modem(SerialAT);
+#endif
+
+// LilyGO T-SIM7000G Pinout
+#define UART_BAUD           115200
+#define PIN_DTR             25
+#define PIN_TX              27
+#define PIN_RX              26
+#define PWR_PIN             4
+void modemPowerOn();
+void modemPowerOff();
+void modemRestart();
+void GSM_connection(void);
+
+void modemPowerOn(){
+  pinMode(PWR_PIN, OUTPUT);
+  digitalWrite(PWR_PIN, LOW);
+  delay(1000);
+  digitalWrite(PWR_PIN, HIGH);
+}
+
+void modemPowerOff(){
+  pinMode(PWR_PIN, OUTPUT);
+  digitalWrite(PWR_PIN, LOW);
+  delay(1500);
+  digitalWrite(PWR_PIN, HIGH);
+}
+
+
+void modemRestart(){
+  modemPowerOff();
+  delay(1000);
+  modemPowerOn();
+}
+void GSM_connection(void)
+{
+   String res;
+
+  Serial.println("========INIT========");
+  if (!modem.init()) {
+    modemRestart();
+    delay(2000);
+    Serial.println("Failed to restart modem, attempting to continue without restarting");
+    return;
+  }
+  Serial.println("========SIMCOMATI======");
+  modem.sendAT("+SIMCOMATI");
+  modem.waitResponse(1000L, res);
+  res.replace(GSM_NL "OK" GSM_NL, "");
+  Serial.println(res);
+  res = "";
+  Serial.println("=======================");
+  Serial.println("=====Preferred mode selection=====");
+  modem.sendAT("+CNMP?");
+  if (modem.waitResponse(1000L, res) == 1) {
+    res.replace(GSM_NL "OK" GSM_NL, "");
+    Serial.println(res);
+  }
+  res = "";
+  Serial.println("=======================");
+
+
+  Serial.println("=====Preferred selection between CAT-M and NB-IoT=====");
+  modem.sendAT("+CMNB?");
+  if (modem.waitResponse(1000L, res) == 1) {
+    res.replace(GSM_NL "OK" GSM_NL, "");
+    Serial.println(res);
+  }
+  res = "";
+  Serial.println("=======================");
+
+
+  String name = modem.getModemName();
+  Serial.println("Modem Name: " + name);
+
+  String modemInfo = modem.getModemInfo();
+  Serial.println("Modem Info: " + modemInfo);
+
+  // Unlock your SIM card with a PIN if needed
+  if ( GSM_PIN && modem.getSimStatus() != 3 ) {
+    modem.simUnlock(GSM_PIN);
+  }
+
+  for (int i = 0; i <= 4; i++) {
+    uint8_t network[] = {
+        2,  /*Automatic*/
+        13, /*GSM only*/
+        38, /*LTE only*/
+        51  /*GSM and LTE only*/
+    };
+    Serial.printf("Try %d method\n", network[i]);
+    modem.setNetworkMode(network[i]);
+    delay(3000);
+    bool isConnected = false;
+    int tryCount = 60;
+    while (tryCount--) {
+      int16_t signal =  modem.getSignalQuality();
+      Serial.print("Signal: ");
+      Serial.print(signal);
+      Serial.print(" ");
+      Serial.print("isNetworkConnected: ");
+      isConnected = modem.isNetworkConnected();
+      Serial.println( isConnected ? "CONNECT" : "NO CONNECT");
+      if (isConnected) {
         break;
       }
-      case GPRS_START_SERIAL:{
-        if(!serial_ready) {
-          serial_ready = true;
-          SerialAT.begin(MODEM_BAUD_RATE, SERIAL_8N1, MODEM_RX, MODEM_TX);
-        }
-        if(millis() - GPRS_last_update >= 100){
-          gprs_setup_state = GPRS_INIT_MODULE;
-          GPRS_last_update = millis();
-        }
+      delay(1000);
+      //digitalWrite(LED_PIN, !digitalRead(LED_PIN));
+    }
+    if (isConnected) {
         break;
-      }
-      case GPRS_INIT_MODULE:{
-        if(!module_ready) {
-          module_ready = true;
-          setup_modem();
-        }
-        if(millis() - GPRS_last_update >= 3000){
-          gprs_setup_state = GPRS_INIT_MODEM;
-          GPRS_last_update = millis();
-        }
-        break;
-      }
-      case GPRS_INIT_MODEM:{
-        modem.restart();
-        gprs_setup_state = GPRS_CONNECT;
-        GPRS_last_update = millis();
-        break;
-      }
-      case GPRS_CONNECT:{
-        if(!connect_ready) {
-          connect_ready = true;
-          
-          // Unlock SIM if PIN is required
-          if (SIM_PIN && modem.getSimStatus() != 3 ) {
-            modem.simUnlock(SIM_PIN);
-          }
-          // Connect
-          modem.gprsConnect(APN, GPRS_USER, GPRS_PASS);
-        }
-        if(millis() - GPRS_last_update >= 500){
-          gprs_setup_state = GPRS_READY_;
-          Serial.println("GPRS ready ");
-        }
-        break;
-      }
-      case GPRS_READY_:{
-        break;
-      }
-      default: break;
     }
   }
-  
-  // Please refer to the datasheet of the SIM800 for more details about this process
-  void setup_modem(){
-    pinMode(MODEM_RST, OUTPUT);
-    digitalWrite(MODEM_RST, HIGH);    
-    pinMode(MODEM_PWRKEY, OUTPUT);
-    pinMode(MODEM_POWER_ON, OUTPUT);
-    digitalWrite(MODEM_POWER_ON, HIGH);
-    // Pull down PWRKEY for 1 second or more according to manual requirements
-    digitalWrite(MODEM_PWRKEY, HIGH);
-    delay(10);
-    digitalWrite(MODEM_PWRKEY, LOW);
-    delay(1000);
-    digitalWrite(MODEM_PWRKEY, HIGH);
+  //digitalWrite(LED_PIN, HIGH);
+
+  Serial.println();
+  Serial.println("Device is connected .");
+  Serial.println();
+
+  Serial.println("=====Inquiring UE system information=====");
+  modem.sendAT("+CPSI?");
+  if (modem.waitResponse(1000L, res) == 1) {
+    res.replace(GSM_NL "OK" GSM_NL, "");
+    Serial.println(res);
   }
-  
-  void GPRS_put_to_sleep(){
-     SerialAT.write("AT+CSCLK=2\r"); // Enable sleep mode until external interrupt
-                                     // Consult datasheet: https://www.elecrow.com/download/SIM800%20Series_AT%20Command%20Manual_V1.09.pdf
-                                     // (Page 160, AT+CSCLK Configure Slow Clock)
-  }
-  
-  void GPRS_wake_up(){
-    unsigned long started_init_ = millis();
-    do{
-      GPRS_init();
-    }while(gprs_setup_state != GPRS_READY_
-           && (millis() - started_init_ <= GPRS_CONN_TIMEOUT)); 
-           
-    if(!modem.isGprsConnected()){ // Couldn't connect
-    Serial.println("Moden connection failed, restarting  ESP ");
-      ESP.restart();
-    }
-  }
-  
-  bool GPRS_connectivity_status(){
-    return modem.isGprsConnected();
-   }
+
+ 
+}
+
+
 #endif

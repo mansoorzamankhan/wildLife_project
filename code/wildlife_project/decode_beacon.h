@@ -31,7 +31,7 @@ String current_time;
 String time_of_next_recording;
 String length_of_next_recording;
 String current_schedule;
-String Sampling_rate;
+String sampling_rate;
 String prefix1;
 String prefix2;
 String recorder_name;
@@ -183,26 +183,26 @@ void Decode_recording(String input) {
   //************************current schedule+++++++++
 
 
-  Sampling_rate = String(beacon_byte[25]);
+  sampling_rate = String(beacon_byte[25]);
 
 
 
-  if (Sampling_rate == "01") Sampling_rate = "8000";
-  if (Sampling_rate == "02") Sampling_rate = "12000";
-  if (Sampling_rate == "03") Sampling_rate = "16000 ";
-  if (Sampling_rate == "04") Sampling_rate = "22050";
-  if (Sampling_rate == "06") Sampling_rate = "32000";
-  if (Sampling_rate == "07") Sampling_rate = "44100";
-  if (Sampling_rate == "08") Sampling_rate = "48000 ";
-  if (Sampling_rate == "09") Sampling_rate = "64000 ";
-  if (Sampling_rate == "0a") Sampling_rate = "88200 ";
-  if (Sampling_rate == "0b") Sampling_rate = "96000 ";
-  if (Sampling_rate == "0c") Sampling_rate = "256000 ";
-  if (Sampling_rate == "0d") Sampling_rate = "384000 ";
-  if (Sampling_rate == "0e") Sampling_rate = "500000";
+  if (sampling_rate == "01") sampling_rate = "8000";
+  if (sampling_rate == "02") sampling_rate = "12000";
+  if (sampling_rate == "03") sampling_rate = "16000 ";
+  if (sampling_rate == "04") sampling_rate = "22050";
+  if (sampling_rate == "06") sampling_rate = "32000";
+  if (sampling_rate == "07") sampling_rate = "44100";
+  if (sampling_rate == "08") sampling_rate = "48000 ";
+  if (sampling_rate == "09") sampling_rate = "64000 ";
+  if (sampling_rate == "0a") sampling_rate = "88200 ";
+  if (sampling_rate == "0b") sampling_rate = "96000 ";
+  if (sampling_rate == "0c") sampling_rate = "256000 ";
+  if (sampling_rate == "0d") sampling_rate = "384000 ";
+  if (sampling_rate == "0e") sampling_rate = "500000";
 
-  Serial.print("Sampling_rate : ");
-  Serial.println(Sampling_rate);
+  Serial.print("sampling_rate : ");
+  Serial.println(sampling_rate);
 }
 void Decode_telemetry(String input) {
 

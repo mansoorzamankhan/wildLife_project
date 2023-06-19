@@ -1,13 +1,12 @@
 #ifndef __GPRS_H__
   #define __GPRS_H__
-#define  TINY_GSM_MODEM_SIM7000SSL
+#define TINY_GSM_MODEM_SIM7000SSL
 #define TINY_GSM_RX_BUFFER 1024 // Set RX buffer to 1Kb
 
 #define SerialAT Serial1
 // Set serial for debug console (to the Serial Monitor, default speed 115200)
 #define SerialMon Serial
-#define TINY_GSM_USE_GPRS true
-#define TINY_GSM_USE_WIFI false
+
 // See all AT commands, if wanted
 // #define DUMP_AT_COMMANDS
 
@@ -15,12 +14,13 @@
 #define GSM_PIN ""
 
 // Your GPRS credentials, if any
-const char apn[]  = "internet.v6.telekom";     //SET TO YOUR APN
+const char apn[]  = "APN internet.nbiot.telekom.de";     //SET TO YOUR APN
 const char gprsUser[] = "";
 const char gprsPass[] = "";
 
 #include <TinyGsmClient.h>
 #include <SPI.h>
+#include <SD.h>
 #include <Ticker.h>
 
 #ifdef DUMP_AT_COMMANDS
@@ -30,7 +30,6 @@ const char gprsPass[] = "";
 #else
   TinyGsm modem(SerialAT);
 #endif
-
 
 // LilyGO T-SIM7000G Pinout
 #define UART_BAUD           115200
@@ -148,7 +147,14 @@ void GSM_connection(void)
   Serial.println("Device is connected .");
   Serial.println();
 
+  Serial.println("=====Inquiring UE system information=====");
+  modem.sendAT("+CPSI?");
+  if (modem.waitResponse(1000L, res) == 1) {
+    res.replace(GSM_NL "OK" GSM_NL, "");
+    Serial.println(res);
+  }
 
+ 
 }
 
 

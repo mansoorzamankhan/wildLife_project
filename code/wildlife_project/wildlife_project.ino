@@ -116,9 +116,9 @@ void DECODE_BEACON(void) {
 }
 
 void MQTT_PUBLISH(void) {
-  String MQTT_data = Manufacturing_Company + "," + bird + "," + mic2 + "," + box_type + "," + SD_capacity + "," + SD_used
-                     + "," + Temprature + "," + battery_level + "," + Firmware_index + "," + error_code + "," + recording_no + "," + TimeZone
-                     + "," + current_time + "," + Time_of_next_recording + "," + current_schedule + "," + Sampling_rate + "," + recorder_name;
+  String MQTT_data = manufacturing_company + "," + bird + "," + mic2 + "," + box_type + "," + SD_capacity + "," + SD_used
+                     + "," + temperature + "," + battery_level + "," + firmware_index + "," + error_code + "," + recording_no + "," + time_zone
+                     + "," + current_time + "," + time_of_next_recording + "," + current_schedule + "," + sampling_rate + "," + recorder_name;
 
   send_MQTT_data(recorder_name, MQTT_data);
 }

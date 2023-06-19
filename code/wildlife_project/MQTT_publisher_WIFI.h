@@ -56,7 +56,9 @@ WiFiClientSecure espClient;
 PubSubClient client(espClient);
 
 void mqtt_setup(void);
-
+void connect_Wifi(void);
+void connect_MQTT(void);
+void send_MQTT_data(String topic,String data);
 
 void mqtt_Setup(void) {
 

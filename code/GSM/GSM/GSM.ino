@@ -1,13 +1,18 @@
+
+
 #include "GSM.h"
 
-void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(115200);
-  GPRS_wake_up();
-  Serial.print("GSM Status  : " );
-  Serial.println(GPRS_connectivity_status());
+
+
+void setup(){
+  // Set console baud rate
+  SerialMon.begin(115200);
+  modemPowerOn();
+  SerialAT.begin(UART_BAUD, SERIAL_8N1, PIN_RX, PIN_TX);
+
+
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
+void loop(){
+ GSM_connection();
 }

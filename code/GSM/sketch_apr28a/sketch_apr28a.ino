@@ -90,7 +90,7 @@ const char wifiSSID[] = "YourSSID";
 const char wifiPass[] = "YourWiFiPass";
 
 // MQTT details
-const char* broker = "broker.hivemq.com";
+const char* broker = "4513d12687ab46a0b58b0ab2ec75a85d.s2.eu.hivemq.cloud";
 
 const char* topicLed = "GsmClientTest/led";
 const char* topicInit = "GsmClientTest/init";
